@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PABLO CASINO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ffbc00;
+            --dark: #0a0a0a;
+            --darker: #050505;
+            --light: #f5f5f5;
+            --gray: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            padding-bottom: 30px;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            position: relative;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 60px;
+            margin-right: 15px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 5px;
+            background: #1a1a1a;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            color: var(--primary);
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(255, 188, 0, 0.5);
+            letter-spacing: 1px;
+        }
+
+        /* Tabs (Admin Panel için görünür, ana sayfa için gizli) */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+            flex-wrap: wrap; /* Küçük ekranlarda alta geçmesi için */
+        }
+
+        .tabs .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            font-weight: bold;
+            color: #ccc;
+            background: #222;
+            border: 1px solid #333;
+            border-bottom: none;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+            white-space: nowrap;
+        }
+
+        .tabs .tab.active {
+            background: var(--primary);
+            color: var(--dark);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 -3px 10px rgba(255, 188, 0, 0.2);
+        }
+
+        .tab-content {
+            display: none; /* Varsayılan olarak gizli */
+            padding: 20px;
+            background: var(--darker);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .tab-content.active {
+            display: block; /* Aktif olan gösterilir */
+        }
+
+        /* Ana İçerik Bölümleri Başlığı */
+        .section-title {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 24px;
+        }
+
+        /* Main Banner Bölümü */
+        #mainBannerDisplay {
+            width: 100%;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            background-color: #0d0d0d;
+            border: 1px solid #333;
+            display: flex; /* İçeriği ortalamak için */
+            justify-content: center; /* İçeriği yatayda ortala */
+            align-items: center; /* İçeriği dikeyde ortala */
+            min-height: 180px; /* Boşken de bir alan kaplaması için */
+            font-size: 1.2em;
+            color: #ccc;
+        }
+
+        #mainBannerDisplay img {
+            width: 100%;
+            height: 180px; /* Main banner için sabit yükseklik */
+            object-fit: contain; /* İçeriğin kutuya sığmasını ve tamamının görünmesini sağlar */
+            display: block; /* Gereksiz boşlukları engelle */
+        }
+
+        /* Banner Bölümü (Sponsorlu Reklamlar) */
+        #bannerContainer {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr; /* Her sırada bir banner */
+            gap: 20px;
+        }
+
+        .banner-item {
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .banner-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .banner-item a {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .banner-item img {
+            width: 100%;
+            height: 100px; /* Banner ve GIF'ler için yeni, daha küçük sabit yükseklik */
+            object-fit: contain; /* İçeriğin kutuya sığmasını ve tamamının görünmesini sağlar */
+            background-color: #0d0d0d; /* Boş kalan kısımlar için arka plan */
+        }
+
+        /* Güvenilir Siteler Bölümü */
+        #trustedSitesDisplaySection {
+            background: var(--darker);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .trusted-sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .trusted-site-item {
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            position: relative;
+            text-align: center;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 250px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .trusted-site-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .trusted-site-item a {
+            display: block;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            color: var(--light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trusted-site-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            padding: 5px;
+            background: #0a0a0d;
+        }
+
+        .trusted-site-item h4 {
+            color: var(--primary);
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .trusted-site-item p {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+
+        /* Admin Panel */
+        .admin-panel {
+            background: var(--darker);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .admin-panel h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ccc;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: var(--light);
+            font-size: 16px;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            background: var(--primary);
+            color: var(--dark);
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #ffa600;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 188, 0, 0.3);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .admin-item {
+            background: #222;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .admin-item img {
+            width: 100%;
+            height: 100px; /* Yönetim panelinde de tamamı gözüksün */
+            object-fit: contain;
+            background-color: #0d0d0d;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+        }
+
+        .admin-item h4 {
+            color: var(--primary);
+            text-align: center;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .admin-item p {
+            font-size: 13px;
+            text-align: center;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center; /* Butonları ortala */
+        }
+
+        .btn-edit {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        /* Scrolling Text */
+        .scrolling-text {
+            background: var(--darker);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #333;
+        }
+
+        .scrolling-text-content {
+            white-space: nowrap;
+            animation: scrollText 20s linear infinite;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 18px;
+            text-shadow: 0 0 5px rgba(255, 188, 0, 0.5);
+        }
+
+        @keyframes scrollText {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Social Links */
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: #1a1a1a;
+            border-radius: 30px;
+            text-decoration: none;
+            color: var(--light);
+            font-weight: bold;
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: var(--primary);
+            color: var(--dark);
+            transform: translateY(-3px);
+        }
+
+        .social-link i {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #bannerContainer {
+                grid-template-columns: 1fr;
+            }
+
+            .trusted-sites-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .logo {
+                margin-bottom: 15px;
+                justify-content: center;
+            }
+
+            .social-links {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tabs .tab {
+                margin-bottom: 5px;
+                border-radius: 5px;
+            }
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Admin Indicator */
+        .admin-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: var(--dark);
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(255, 188, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 14px;
+            margin-top: 30px;
+            border-top: 1px solid #333;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        /* Password Modal */
+        .password-modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 2000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--darker);
+            margin: auto;
+            padding: 30px;
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .modal-content h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: calc(100% - 24px); /* Padding'i hesaba kat */
+            padding: 12px;
+            margin-bottom: 20px;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 5px;
+            color: var(--light);
+            font-size: 16px;
+        }
+
+        .modal-content button {
+            width: 100%;
+        }
+
+        /* Main Sponsor Popup Styles */
+        .main-sponsor-popup {
+            display: none; /* Varsayılan olarak gizli */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); /* Koyu arka plan */
+            backdrop-filter: blur(5px); /* Hafif bulanıklık */
+            z-index: 3000; /* Diğer her şeyin üstünde */
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .main-sponsor-popup.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .popup-content {
+            background-color: var(--darker);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--primary);
+            animation: fadeInScale 0.4s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* İçerikleri dikeyde de ortala */
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .close-popup {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: var(--primary);
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-popup:hover {
+            color: #fff;
+        }
+
+        #popupBannerImageContainer {
+            width: 100%;
+            height: 250px; /* Pop-up banner yüksekliği */
+            margin-bottom: 25px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #0d0d0d;
+            border: 1px solid #444;
+            display: flex; /* İçindeki görseli ortalamak için flex kullan */
+            justify-content: center;
+            align-items: center;
+        }
+
+        #popupBannerImageContainer img {
+            max-width: 100%; /* Genişlik container'ı aşmasın */
+            max-height: 100%; /* Yükseklik container'ı aşmasın */
+            object-fit: contain; /* Görselin tamamının görünmesini sağlar */
+            display: block;
+        }
+
+        .popup-text {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .popup-text h3 {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 12px;
+            text-shadow: 0 0 10px rgba(255, 188, 0, 0.6);
+            letter-spacing: 1.5px;
+            line-height: 1.2;
+        }
+
+        .popup-text p {
+            color: #ccc;
+            font-size: 20px;
+            line-height: 1.3;
+        }
+
+        .popup-content .btn {
+            margin-top: 20px;
+            width: 80%;
+            padding: 18px;
+            font-size: 20px;
+        }
+
+        /* Responsive için pop-up ayarları */
+        @media (max-width: 600px) {
+            .popup-content {
+                padding: 20px;
+            }
+
+            #popupBannerImageContainer {
+                height: 180px; /* Küçük ekranlarda yükseklik düşürüldü */
+            }
+
+            .popup-text h3 {
+                font-size: 22px;
+            }
+
+            .popup-text p {
+                font-size: 17px;
+            }
+
+            .popup-content .btn {
+                width: 95%;
+                font-size: 17px;
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="mainSponsorPopup" class="main-sponsor-popup">
+        <div class="popup-content">
+            <span class="close-popup" id="closeSponsorPopup">&times;</span>
+            <div id="popupBannerImageContainer">
+                <p>Ana sponsor yükleniyor...</p>
+            </div>
+            <div class="popup-text">
+                <h3 id="popupMainText"></h3>
+                <p id="popupSubText"></p>
+            </div>
+            <button class="btn btn-block" id="goToSponsorSite"><i class="fas fa-external-link-alt"></i> SİTEYE GİT</button>
+        </div>
+    </div>
+
+    <div class="admin-indicator" style="display: none;">
+        <i class="fas fa-user-shield"></i> YÖNETİM MODU
+    </div>
+
+    <div class="notification" id="notification">
+        İşlem başarıyla tamamlandı!
+    </div>
+
+    <div id="passwordModal" class="password-modal">
+        <div class="modal-content">
+            <h3>Yönetim Paneli Şifresi</h3>
+            <input type="password" id="adminPassword" placeholder="Şifreyi girin">
+            <button class="btn btn-block" id="submitPassword">Giriş Yap</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-crown fa-2x" style="color: var(--primary);"></i>
+                <h1>PABLO CASINO</h1>
+            </div>
+            <div>
+                <button class="btn" id="adminToggle"><i class="fas fa-cog"></i> YÖNETİM PANELİ</button>
+            </div>
+        </div>
+
+        <div class="social-links" id="socialLinksContainer">
+            </div>
+
+        <div id="mainBannerDisplay">
+            Ana banner yükleniyor...
+        </div>
+
+        <div class="tab-content active" id="mainContent">
+            <h2 class="section-title">
+                <i class="fas fa-bullhorn"></i> SPONSORLU REKLAMLAR
+            </h2>
+            <div id="bannerContainer">
+                </div>
+        </div>
+
+        <div id="trustedSitesDisplaySection">
+            <h2 class="section-title">
+                <i class="fas fa-shield-alt"></i> GÜVENİLİR SİTELER
+            </h2>
+            <div class="trusted-sites-grid" id="trustedSitesGrid">
+                </div>
+        </div>
+
+        <div class="scrolling-text">
+            <div class="scrolling-text-content" id="scrollingTextContent">
+                </div>
+        </div>
+
+        <div class="admin-panel" id="adminPanel" style="display: none;">
+            <h2><i class="fas fa-cog"></i> YÖNETİM PANELİ</h2>
+
+            <div class="tabs">
+                <div class="tab active" data-admin-tab="mainBanner">Ana Banner</div>
+                <div class="tab" data-admin-tab="social">Sosyal Medya</div>
+                <div class="tab" data-admin-tab="sponsor">Sponsorlu Reklam</div>
+                <div class="tab" data-admin-tab="trusted">Güvenilir Site</div>
+                <div class="tab" data-admin-tab="scrollingText">Kaydırma Metni</div>
+            </div>
+
+            <div class="tab-content active" id="mainBannerForm">
+                <div class="form-group">
+                    <label for="mainBannerImage">Ana Banner GIF/Resim URL</label>
+                    <input type="text" id="mainBannerImage" class="form-control" placeholder="https://...">
+                    <small>Önerilen boyut: 1200x180 piksel (İçerik tam görünsün)</small>
+                </div>
+                <div class="form-group">
+                    <label for="mainBannerLink">Ana Banner Linki</label>
+                    <input type="url" id="mainBannerLink" class="form-control" placeholder="https://">
+                </div>
+                <button class="btn btn-block" id="saveMainBanner"><i class="fas fa-save"></i> ANA BANNERI KAYDET</button>
+
+                <h2 style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
+                    <i class="fas fa-image"></i> MEVCUT ANA BANNER
+                </h2>
+                <div id="currentMainBanner" style="text-align: center; margin-top: 20px;">
+                    </div>
+            </div>
+
+            <div class="tab-content" id="socialForm">
+                <input type="hidden" id="socialId">
+                <div class="form-group">
+                    <label for="socialIcon">İkon Kodu (Font Awesome)</label>
+                    <input type="text" id="socialIcon" class="form-control" placeholder="fab fa-twitter veya fas fa-link">
+                    <small><a href="https://fontawesome.com/icons" target="_blank" style="color: var(--primary);">İkon kodlarını buradan bulabilirsiniz.</a></small>
+                </div>
+                <div class="form-group">
+                    <label for="socialText">Link Metni</label>
+                    <input type="text" id="socialText" class="form-control" placeholder="ILLEGALBET X">
+                </div>
+                <div class="form-group">
+                    <label for="socialLink">Link URL</label>
+                    <input type="url" id="socialLink" class="form-control" placeholder="https://">
+                </div>
+                <button class="btn btn-block" id="saveSocialLink"><i class="fas fa-plus"></i> SOSYAL LİNK EKLE</button>
+
+                <h2 style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
+                    <i class="fas fa-share-alt"></i> MEVCUT SOSYAL LİNKLER
+                </h2>
+                <div class="admin-grid" id="adminSocialLinksContainer">
+                    </div>
+            </div>
+
+            <div class="tab-content" id="sponsorForm">
+                <input type="hidden" id="sponsorId">
+                <div class="form-group">
+                    <label for="sponsorImage">GIF/Resim URL</label>
+                    <input type="text" id="sponsorImage" class="form-control" placeholder="https://...">
+                    <small>Önerilen boyut: 1200x100 piksel (İçerik tam görünsün)</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="sponsorLink">Site Linki</label>
+                    <input type="url" id="sponsorLink" class="form-control" placeholder="https://">
+                </div>
+
+                <button class="btn btn-block" id="saveSponsor"><i class="fas fa-plus"></i> REKLAMI EKLE</button>
+
+                <h2 style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
+                    <i class="fas fa-list"></i> MEVCUT REKLAMLAR
+                </h2>
+                <div class="admin-grid" id="adminSponsorContainer">
+                    </div>
+            </div>
+
+            <div class="tab-content" id="trustedForm">
+                <input type="hidden" id="trustedId">
+                <div class="form-group">
+                    <label for="trustedImage">Site Logo URL</label>
+                    <input type="text" id="trustedImage" class="form-control" placeholder="https://...">
+                    <small>Önerilen boyut: 100x100 piksel</small>
+                </div>
+                <div class="form-group">
+                    <label for="trustedName">Site Adı</label>
+                    <input type="text" id="trustedName" class="form-control" placeholder="Süperbetin">
+                </div>
+                <div class="form-group">
+                    <label for="trustedDesc">Açıklama (Opsiyonel)</label>
+                    <input type="text" id="trustedDesc" class="form-control" placeholder="KOD: SB1000 veya Hızlı ödemeler">
+                </div>
+                <div class="form-group">
+                    <label for="trustedLink">Site Linki</label>
+                    <input type="url" id="trustedLink" class="form-control" placeholder="https://">
+                </div>
+                <button class="btn btn-block" id="saveTrusted"><i class="fas fa-plus"></i> GÜVENİLİR SİTE EKLE</button>
+
+                <h2 style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
+                    <i class="fas fa-list"></i> MEVCUT GÜVENİLİR SİTELER
+                </h2>
+                <div class="admin-grid" id="adminTrustedContainer">
+                    </div>
+            </div>
+
+            <div class="tab-content" id="scrollingTextForm">
+                 <div class="form-group">
+                    <label for="scrollingTextAdminPanel">Kaydırma Metni İçeriği</label>
+                    <input type="text" id="scrollingTextAdminPanel" class="form-control" placeholder="Önemli Duyurularınız...">
+                </div>
+                <button class="btn btn-block" id="saveScrollingTextAdminPanel"><i class="fas fa-save"></i> METNİ KAYDET</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 PABLO CASINO - Tüm Hakları Saklıdır</p>
+    </div>
+
+    <script>
+        // API_BASE_URL: Backend'in çalıştığı URL.
+        // Kendi bilgisayarınızda çalışırken genellikle http://localhost:3000 olacaktır.
+        // Canlı bir sunucuya yüklediğinizde, sunucunuzun alan adıyla güncellenmelidir.
+        // Örneğin: https://sizindomaininiz.com
+        const API_BASE_URL = 'https://pablo-24kz.onrender.com'; // BURASI GÜNCELLENDİ
+
+        // Yönetim paneli şifresi (DİKKAT: Gerçek bir uygulamada bu şifre asla frontend'de olmamalı,
+        // sunucu tarafında güvenli bir şekilde saklanmalı ve doğrulanmalıdır!)
+        const ADMIN_PASSWORD = "bebek"; // Lütfen bunu daha güvenli bir şifreyle değiştirin!
+
+        // DOM elementleri
+        const mainBannerDisplay = document.getElementById('mainBannerDisplay');
+        const socialLinksContainer = document.getElementById('socialLinksContainer');
+        const bannerContainer = document.getElementById('bannerContainer');
+        const trustedSitesGrid = document.getElementById('trustedSitesGrid');
+        const scrollingTextContent = document.getElementById('scrollingTextContent');
+        // scrollingTextAdmin kaldırıldı
+
+        const adminSponsorContainer = document.getElementById('adminSponsorContainer');
+        const adminTrustedContainer = document.getElementById('adminTrustedContainer');
+        const adminSocialLinksContainer = document.getElementById('adminSocialLinksContainer');
+        const currentMainBannerDisplay = document.getElementById('currentMainBanner');
+        const scrollingTextAdminPanel = document.getElementById('scrollingTextAdminPanel'); // Yönetim panelindeki metin girişi
+
+        const notification = document.getElementById('notification');
+        const adminToggleBtn = document.getElementById('adminToggle');
+        const adminPanel = document.getElementById('adminPanel');
+        const adminIndicator = document.querySelector('.admin-indicator');
+        const passwordModal = document.getElementById('passwordModal');
+        const adminPasswordInput = document.getElementById('adminPassword');
+        const submitPasswordBtn = document.getElementById('submitPassword');
+
+        const mainSponsorPopup = document.getElementById('mainSponsorPopup');
+        const closeSponsorPopupBtn = document.getElementById('closeSponsorPopup');
+        const popupBannerImageContainer = document.getElementById('popupBannerImageContainer');
+        const popupMainText = document.getElementById('popupMainText');
+        const popupSubText = document.getElementById('popupSubText');
+        const goToSponsorSiteBtn = document.getElementById('goToSponsorSite');
+        let currentMainBannerLink = '#'; // Pop-up butonu için linki tutacak değişken
+
+        // Yardımcı Fonksiyon: API isteği gönderme
+        async function fetchData(endpoint, method = 'GET', data = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP Hata: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`API isteği başarısız: ${endpoint}`, error);
+                throw error;
+            }
+        }
+
+        // Ana bannerı render et
+        async function renderMainBanner() {
+            try {
+                const data = await fetchData('mainBanner');
+                mainBannerDisplay.innerHTML = '';
+                if (data && data.image) {
+                    mainBannerDisplay.innerHTML = `
+                        <a href="${data.link || '#'}" target="_blank">
+                            <img src="${data.image}" alt="Main Banner">
+                        </a>
+                    `;
+                } else {
+                    mainBannerDisplay.innerHTML = `<p style="color:#aaa; text-align:center; padding: 20px;">Ana banner henüz ayarlanmadı.</p>`;
+                }
+            } catch (error) {
+                mainBannerDisplay.innerHTML = `<p style="color:#f44336; text-align:center;">Ana banner yüklenemedi.</p>`;
+            }
+        }
+
+        // Pop-up'ı gösteren fonksiyon
+        async function showMainSponsorPopup() {
+            try {
+                const data = await fetchData('mainBanner');
+                if (data && data.image) {
+                    popupBannerImageContainer.innerHTML = `<img src="${data.image}" alt="Ana Sponsor Banner">`;
+                    popupMainText.textContent = '𝗔𝗡𝗔 𝗦𝗣𝗢𝗡𝗦𝗢𝗥 𝗕𝗔𝗛𝗜𝗦𝗠𝗢𝗥𝗘'; // Sabit metin
+                    popupSubText.textContent = '𝗞𝗔𝗭𝗔𝗡𝗖𝗜𝗡 𝗧𝗘𝗞 𝗔𝗗𝗥𝗘𝗦𝗜'; // Sabit metin
+                    currentMainBannerLink = data.link || '#'; // Linki ayarla
+
+                    mainSponsorPopup.classList.add('active'); // Pop-up'ı görünür yap
+                } else {
+                    console.log("Ana banner verisi yok, pop-up gösterilmedi.");
+                }
+            } catch (error) {
+                console.error("Ana sponsor pop-up yüklenirken hata:", error);
+                popupBannerImageContainer.innerHTML = `<p style="color:#f44336; text-align:center;">Ana sponsor yüklenemedi.</p>`;
+            }
+        }
+
+        // Pop-up'ı kapatan fonksiyon
+        closeSponsorPopupBtn.addEventListener('click', () => {
+            mainSponsorPopup.classList.remove('active');
+        });
+
+        // "Siteye Git" butonuna tıklama işleyicisi
+        goToSponsorSiteBtn.addEventListener('click', () => {
+            if (currentMainBannerLink && currentMainBannerLink !== '#') {
+                window.open(currentMainBannerLink, '_blank');
+            } else {
+                showNotification('Ana sponsor linki bulunamadı!', 'error');
+            }
+            mainSponsorPopup.classList.remove('active'); // Butona basılınca da kapat
+        });
+
+
+        // Sosyal linkleri render et
+        async function renderSocialLinks() {
+            try {
+                const links = await fetchData('socialLinks');
+                socialLinksContainer.innerHTML = '';
+                if (links && links.length > 0) {
+                    links.forEach(link => {
+                        const item = document.createElement('a');
+                        item.className = 'social-link';
+                        item.href = link.url || '#';
+                        item.target = '_blank';
+                        item.innerHTML = `<i class="${link.icon}"></i> ${link.text}`;
+                        socialLinksContainer.appendChild(item);
+                    });
+                } else {
+                    socialLinksContainer.innerHTML = `<p style="color:#aaa; text-align:center; width: 100%;">Henüz sosyal link eklenmedi.</p>`;
+                }
+            } catch (error) {
+                socialLinksContainer.innerHTML = `<p style="color:#f44336; text-align:center; width: 100%;">Sosyal linkler yüklenemedi.</p>`;
+            }
+        }
+
+        // Sponsorlu bannerları render et
+        async function renderSponsors() {
+            try {
+                const sponsors = await fetchData('sponsors');
+                bannerContainer.innerHTML = '';
+                if (sponsors && sponsors.length > 0) {
+                    sponsors.forEach(sponsor => {
+                        const item = document.createElement('div');
+                        item.className = 'banner-item';
+                        item.innerHTML = `
+                            <a href="${sponsor.link || '#'}" target="_blank">
+                                <img src="${sponsor.image}" alt="Sponsor Banner">
+                            </a>
+                        `;
+                        bannerContainer.appendChild(item);
+                    });
+                } else {
+                    bannerContainer.innerHTML = `<p style="color:#aaa; text-align:center; width: 100%;">Henüz sponsorlu reklam eklenmedi.</p>`;
+                }
+            } catch (error) {
+                bannerContainer.innerHTML = `<p style="color:#f44336; text-align:center; width: 100%;">Sponsorlu reklamlar yüklenemedi.</p>`;
+            }
+        }
+
+        // Güvenilir siteleri render et
+        async function renderTrustedSites() {
+            try {
+                const sites = await fetchData('trustedSites');
+                trustedSitesGrid.innerHTML = '';
+                if (sites && sites.length > 0) {
+                    sites.forEach(site => {
+                        const item = document.createElement('div');
+                        item.className = 'trusted-site-item pulse';
+                        item.innerHTML = `
+                            <a href="${site.link || '#'}" target="_blank">
+                                <img src="${site.image}" alt="${site.name}">
+                                <h4>${site.name}</h4>
+                                <p>${site.description || ''}</p>
+                            </a>
+                        `;
+                        trustedSitesGrid.appendChild(item);
+                    });
+                } else {
+                    trustedSitesGrid.innerHTML = `<p style="color:#aaa; text-align:center; width: 100%;">Henüz güvenilir site eklenmedi.</p>`;
+                }
+            } catch (error) {
+                trustedSitesGrid.innerHTML = `<p style="color:#f44336; text-align:center; width: 100%;">Güvenilir siteler yüklenemedi.</p>`;
+            }
+        }
+
+        // Kaydırma metnini render et
+        async function renderScrollingText() {
+            try {
+                const data = await fetchData('scrollingText');
+                if (data && data.text) {
+                    scrollingTextContent.textContent = data.text;
+                    // scrollingTextAdmin.value kaldırıldı
+                    scrollingTextAdminPanel.value = data.text; // Admin panelindeki metin
+                } else {
+                    scrollingTextContent.textContent = "Kaydırma metni yükleniyor...";
+                    // scrollingTextAdmin.value kaldırıldı
+                    scrollingTextAdminPanel.value = "";
+                }
+            } catch (error) {
+                scrollingTextContent.textContent = "Kaydırma metni yüklenemedi.";
+                // scrollingTextAdmin.value kaldırıldı
+                scrollingTextAdminPanel.value = "";
+            }
+        }
+
+        // Admin panelindeki ana bannerı render et
+        async function renderAdminMainBanner() {
+            try {
+                const data = await fetchData('mainBanner');
+                currentMainBannerDisplay.innerHTML = '';
+                if (data && data.image) {
+                    currentMainBannerDisplay.innerHTML = `
+                        <img src="${data.image}" alt="Mevcut Ana Banner" style="width: 100%; max-height: 180px; object-fit: contain; border-radius: 5px; border: 1px solid #444; background-color: #0d0d0d;">
+                        <div class="admin-actions" style="margin-top: 15px;">
+                            <button class="btn btn-delete" onclick="deleteMainBanner()"><i class="fas fa-trash"></i> Ana Banner'ı Sil</button>
+                        </div>
+                    `;
+                } else {
+                    currentMainBannerDisplay.innerHTML = `<p style="color:#aaa;">Ana banner ayarlanmadı.</p>`;
+                }
+                document.getElementById('mainBannerImage').value = data.image || '';
+                document.getElementById('mainBannerLink').value = data.link || '';
+            } catch (error) {
+                currentMainBannerDisplay.innerHTML = `<p style="color:#f44336;">Mevcut ana banner yüklenemedi.</p>`;
+            }
+        }
+
+        // Admin panelindeki sosyal linkleri render et
+        async function renderAdminSocialLinks() {
+            try {
+                const links = await fetchData('socialLinks');
+                adminSocialLinksContainer.innerHTML = '';
+                if (links && links.length > 0) {
+                    links.forEach((link, index) => {
+                        const adminItem = document.createElement('div');
+                        adminItem.className = 'admin-item';
+                        adminItem.innerHTML = `
+                            <p style="font-size: 14px; text-align: center; color: var(--primary);"><i class="${link.icon}"></i> ${link.text}</p>
+                            <p style="font-size: 12px; text-align: center; color: #aaa; word-break: break-all;">${link.url}</p>
+                            <div class="admin-actions">
+                                <button class="btn btn-edit" onclick="editSocialLink('${link.id}')"><i class="fas fa-edit"></i> Düzenle</button>
+                                <button class="btn btn-delete" onclick="deleteSocialLink('${link.id}')"><i class="fas fa-trash"></i> Sil</button>
+                            </div>
+                        `;
+                        adminSocialLinksContainer.appendChild(adminItem);
+                    });
+                } else {
+                    adminSocialLinksContainer.innerHTML = `<p style="color:#aaa;">Henüz sosyal link eklenmedi.</p>`;
+                }
+            } catch (error) {
+                adminSocialLinksContainer.innerHTML = `<p style="color:#f44336;">Sosyal linkler yüklenemedi.</p>`;
+            }
+        }
+
+        // Admin panelindeki reklamları render et
+        async function renderAdminSponsors() {
+            try {
+                const sponsors = await fetchData('sponsors');
+                adminSponsorContainer.innerHTML = '';
+                if (sponsors && sponsors.length > 0) {
+                    sponsors.forEach((sponsor, index) => {
+                        const adminItem = document.createElement('div');
+                        adminItem.className = 'admin-item';
+                        adminItem.innerHTML = `
+                            <img src="${sponsor.image}" alt="Sponsor Banner">
+                            <div class="admin-actions">
+                                <button class="btn btn-edit" onclick="editSponsor('${sponsor.id}')"><i class="fas fa-edit"></i> Düzenle</button>
+                                <button class="btn btn-delete" onclick="deleteSponsor('${sponsor.id}')"><i class="fas fa-trash"></i> Sil</button>
+                            </div>
+                        `;
+                        adminSponsorContainer.appendChild(adminItem);
+                    });
+                } else {
+                    adminSponsorContainer.innerHTML = `<p style="color:#aaa;">Henüz sponsorlu reklam eklenmedi.</p>`;
+                }
+            } catch (error) {
+                adminSponsorContainer.innerHTML = `<p style="color:#f44336;">Sponsorlu reklamlar yüklenemedi.</p>`;
+            }
+        }
+
+        // Admin panelindeki güvenilir siteleri render et
+        async function renderAdminTrustedSites() {
+            try {
+                const sites = await fetchData('trustedSites');
+                adminTrustedContainer.innerHTML = '';
+                if (sites && sites.length > 0) {
+                    sites.forEach((site, index) => {
+                        const adminItem = document.createElement('div');
+                        adminItem.className = 'admin-item';
+                        adminItem.innerHTML = `
+                            <img src="${site.image}" alt="${site.name}">
+                            <h4>${site.name}</h4>
+                            <p>${site.description || ''}</p>
+                            <div class="admin-actions">
+                                <button class="btn btn-edit" onclick="editTrustedSite('${site.id}')"><i class="fas fa-edit"></i> Düzenle</button>
+                                <button class="btn btn-delete" onclick="deleteTrustedSite('${site.id}')"><i class="fas fa-trash"></i> Sil</button>
+                            </div>
+                        `;
+                        adminTrustedContainer.appendChild(adminItem);
+                    });
+                } else {
+                    adminTrustedContainer.innerHTML = `<p style="color:#aaa;">Henüz güvenilir site eklenmedi.</p>`;
+                }
+            } catch (error) {
+                adminTrustedContainer.innerHTML = `<p style="color:#f44336;">Güvenilir siteler yüklenemedi.</p>`;
+            }
+        }
+
+        // --- CRUD İşlemleri ---
+
+        // Ana bannerı kaydet/güncelle
+        document.getElementById('saveMainBanner').addEventListener('click', async () => {
+            const image = document.getElementById('mainBannerImage').value;
+            const link = document.getElementById('mainBannerLink').value;
+
+            if (!image || !link) {
+                showNotification('Lütfen Ana Banner için resim URL\'si ve linki girin!', 'error');
+                return;
+            }
+
+            try {
+                await fetchData('mainBanner', 'POST', { image, link });
+                showNotification('Ana Banner güncellendi!');
+                renderMainBanner();
+                renderAdminMainBanner();
+            } catch (error) {
+                showNotification(`Ana Banner güncellenemedi: ${error.message}`, 'error');
+            }
+        });
+
+        // Ana bannerı sil
+        window.deleteMainBanner = async function() {
+            if (confirm('Ana bannerı silmek istediğinize emin misiniz?')) {
+                try {
+                    await fetchData('mainBanner', 'DELETE');
+                    showNotification('Ana Banner silindi!');
+                    renderMainBanner();
+                    renderAdminMainBanner();
+                } catch (error) {
+                    showNotification(`Ana Banner silinemedi: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Yeni sosyal link ekle veya güncelle
+        document.getElementById('saveSocialLink').addEventListener('click', async () => {
+            const id = document.getElementById('socialId').value;
+            const icon = document.getElementById('socialIcon').value;
+            const text = document.getElementById('socialText').value;
+            const url = document.getElementById('socialLink').value;
+
+            if (!icon || !text || !url) {
+                showNotification('Lütfen tüm sosyal link alanlarını doldurun!', 'error');
+                return;
+            }
+
+            try {
+                if (id) {
+                    await fetchData(`socialLinks/${id}`, 'PUT', { icon, text, url });
+                    showNotification('Sosyal link güncellendi!');
+                } else {
+                    await fetchData('socialLinks', 'POST', { icon, text, url });
+                    showNotification('Sosyal link eklendi!');
+                }
+                renderSocialLinks();
+                renderAdminSocialLinks();
+                resetSocialLinkForm();
+            } catch (error) {
+                showNotification(`Sosyal link işlemi başarısız: ${error.message}`, 'error');
+            }
+        });
+
+        // Sosyal link düzenle
+        window.editSocialLink = async function(id) {
+            try {
+                const links = await fetchData('socialLinks');
+                const link = links.find(l => l.id === id);
+                if (link) {
+                    document.getElementById('socialId').value = link.id;
+                    document.getElementById('socialIcon').value = link.icon;
+                    document.getElementById('socialText').value = link.text;
+                    document.getElementById('socialLink').value = link.url;
+                    document.getElementById('saveSocialLink').innerHTML = '<i class="fas fa-save"></i> SOSYAL LİNKİ GÜNCELLE';
+
+                    document.querySelector('[data-admin-tab="social"]').click();
+                    document.getElementById('socialIcon').focus();
+                } else {
+                    showNotification('Düzenlenecek sosyal link bulunamadı!', 'error');
+                }
+            } catch (error) {
+                showNotification(`Sosyal link çekilirken hata: ${error.message}`, 'error');
+            }
+        }
+
+        // Sosyal link sil
+        window.deleteSocialLink = async function(id) {
+            if (confirm('Bu sosyal linki silmek istediğinize emin misiniz?')) {
+                try {
+                    await fetchData(`socialLinks/${id}`, 'DELETE');
+                    showNotification('Sosyal link silindi!');
+                    renderSocialLinks();
+                    renderAdminSocialLinks();
+                } catch (error) {
+                    showNotification(`Sosyal link silinemedi: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Sosyal link formunu sıfırla
+        function resetSocialLinkForm() {
+            document.getElementById('socialId').value = '';
+            document.getElementById('socialIcon').value = '';
+            document.getElementById('socialText').value = '';
+            document.getElementById('socialLink').value = '';
+            document.getElementById('saveSocialLink').innerHTML = '<i class="fas fa-plus"></i> SOSYAL LİNK EKLE';
+        }
+
+        // Yeni reklam ekle veya güncelle
+        document.getElementById('saveSponsor').addEventListener('click', async () => {
+            const id = document.getElementById('sponsorId').value;
+            const image = document.getElementById('sponsorImage').value;
+            const link = document.getElementById('sponsorLink').value;
+
+            if (!image || !link) {
+                showNotification('Lütfen tüm alanları doldurun!', 'error');
+                return;
+            }
+
+            try {
+                if (id) {
+                    await fetchData(`sponsors/${id}`, 'PUT', { image, link });
+                    showNotification('Reklam güncellendi!');
+                } else {
+                    await fetchData('sponsors', 'POST', { image, link });
+                    showNotification('Reklam eklendi!');
+                }
+                renderSponsors();
+                renderAdminSponsors();
+                resetSponsorForm();
+            } catch (error) {
+                showNotification(`Reklam işlemi başarısız: ${error.message}`, 'error');
+            }
+        });
+
+        // Reklam düzenle
+        window.editSponsor = async function(id) {
+            try {
+                const sponsors = await fetchData('sponsors');
+                const sponsor = sponsors.find(s => s.id === id);
+                if (sponsor) {
+                    document.getElementById('sponsorId').value = sponsor.id;
+                    document.getElementById('sponsorImage').value = sponsor.image;
+                    document.getElementById('sponsorLink').value = sponsor.link;
+                    document.getElementById('saveSponsor').innerHTML = '<i class="fas fa-save"></i> REKLAMI GÜNCELLE';
+
+                    document.querySelector('[data-admin-tab="sponsor"]').click();
+                    document.getElementById('sponsorImage').focus();
+                } else {
+                    showNotification('Düzenlenecek reklam bulunamadı!', 'error');
+                }
+            } catch (error) {
+                showNotification(`Reklam çekilirken hata: ${error.message}`, 'error');
+            }
+        }
+
+        // Reklam sil
+        window.deleteSponsor = async function(id) {
+            if (confirm('Bu reklamı silmek istediğinize emin misiniz?')) {
+                try {
+                    await fetchData(`sponsors/${id}`, 'DELETE');
+                    showNotification('Reklam silindi!');
+                    renderSponsors();
+                    renderAdminSponsors();
+                } catch (error) {
+                    showNotification(`Reklam silinemedi: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Sponsor formunu sıfırla
+        function resetSponsorForm() {
+            document.getElementById('sponsorId').value = '';
+            document.getElementById('sponsorImage').value = '';
+            document.getElementById('sponsorLink').value = '';
+            document.getElementById('saveSponsor').innerHTML = '<i class="fas fa-plus"></i> REKLAMI EKLE';
+        }
+
+        // Yeni güvenilir site ekle veya güncelle
+        document.getElementById('saveTrusted').addEventListener('click', async () => {
+            const id = document.getElementById('trustedId').value;
+            const image = document.getElementById('trustedImage').value;
+            const name = document.getElementById('trustedName').value;
+            const description = document.getElementById('trustedDesc').value;
+            const link = document.getElementById('trustedLink').value;
+
+            if (!image || !name || !link) {
+                showNotification('Lütfen logo, ad ve link alanlarını doldurun!', 'error');
+                return;
+            }
+
+            try {
+                if (id) {
+                    await fetchData(`trustedSites/${id}`, 'PUT', { image, name, description, link });
+                    showNotification('Güvenilir site güncellendi!');
+                } else {
+                    await fetchData('trustedSites', 'POST', { image, name, description, link });
+                    showNotification('Güvenilir site eklendi!');
+                }
+                renderTrustedSites();
+                renderAdminTrustedSites();
+                resetTrustedForm();
+            } catch (error) {
+                showNotification(`Güvenilir site işlemi başarısız: ${error.message}`, 'error');
+            }
+        });
+
+        // Güvenilir site düzenle
+        window.editTrustedSite = async function(id) {
+            try {
+                const sites = await fetchData('trustedSites');
+                const site = sites.find(s => s.id === id);
+                if (site) {
+                    document.getElementById('trustedId').value = site.id;
+                    document.getElementById('trustedImage').value = site.image;
+                    document.getElementById('trustedName').value = site.name;
+                    document.getElementById('trustedDesc').value = site.description;
+                    document.getElementById('trustedLink').value = site.link;
+                    document.getElementById('saveTrusted').innerHTML = '<i class="fas fa-save"></i> SİTEYİ GÜNCELLE';
+
+                    document.querySelector('[data-admin-tab="trusted"]').click();
+                    document.getElementById('trustedImage').focus();
+                } else {
+                    showNotification('Düzenlenecek güvenilir site bulunamadı!', 'error');
+                }
+            } catch (error) {
+                showNotification(`Güvenilir site çekilirken hata: ${error.message}`, 'error');
+            }
+        }
+
+        // Güvenilir site sil
+        window.deleteTrustedSite = async function(id) {
+            if (confirm('Bu güvenilir siteyi silmek istediğinize emin misiniz?')) {
+                try {
+                    await fetchData(`trustedSites/${id}`, 'DELETE');
+                    showNotification('Güvenilir site silindi!');
+                    renderTrustedSites();
+                    renderAdminTrustedSites();
+                } catch (error) {
+                    showNotification(`Güvenilir site silinemedi: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Güvenilir site formunu sıfırla
+        function resetTrustedForm() {
+            document.getElementById('trustedId').value = '';
+            document.getElementById('trustedImage').value = '';
+            document.getElementById('trustedName').value = '';
+            document.getElementById('trustedDesc').value = '';
+            document.getElementById('trustedLink').value = '';
+            document.getElementById('saveTrusted').innerHTML = '<i class="fas fa-plus"></i> GÜVENİLİR SİTE EKLE';
+        }
+
+        // Kaydırma metnini kaydet (Admin panelindeki giriş)
+        document.getElementById('saveScrollingTextAdminPanel').addEventListener('click', async () => {
+            const text = scrollingTextAdminPanel.value;
+            if (!text) {
+                showNotification('Lütfen kaydırma metnini girin!', 'error');
+                return;
+            }
+            try {
+                await fetchData('scrollingText', 'POST', { text });
+                showNotification('Kaydırma metni güncellendi!');
+                renderScrollingText();
+            } catch (error) {
+                showNotification(`Kaydırma metni güncellenemedi: ${error.message}`, 'error');
+            }
+        });
+
+
+        // Bildirim göster
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.style.backgroundColor = type === 'error' ? '#f44336' : '#4CAF50';
+            notification.style.display = 'block';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // Admin paneli tab geçiş işlevselliği
+        document.querySelectorAll('.admin-panel .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.admin-panel .tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                document.querySelectorAll('.admin-panel .tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                const adminTabType = tab.getAttribute('data-admin-tab');
+                document.getElementById(`${adminTabType}Form`).classList.add('active');
+
+                // Yeni sekme açıldığında ilgili formu sıfırla ve render et
+                if (adminTabType === 'mainBanner') {
+                    renderAdminMainBanner();
+                } else if (adminTabType === 'social') {
+                    resetSocialLinkForm();
+                    renderAdminSocialLinks();
+                } else if (adminTabType === 'sponsor') {
+                    resetSponsorForm();
+                    renderAdminSponsors();
+                } else if (adminTabType === 'trusted') {
+                    resetTrustedForm();
+                    renderAdminTrustedSites();
+                } else if (adminTabType === 'scrollingText') {
+                    renderScrollingText(); // Metni güncellemek için
+                }
+            });
+        });
+
+
+        // Yönetim paneli açma/kapama ve şifre kontrolü
+        adminToggleBtn.addEventListener('click', () => {
+            if (adminPanel.style.display === 'none') {
+                passwordModal.style.display = 'flex'; // Modalı göster
+                adminPasswordInput.value = ''; // Şifre alanını temizle
+                adminPasswordInput.focus(); // Şifre alanına odaklan
+            } else {
+                adminPanel.style.display = 'none';
+                adminToggleBtn.innerHTML = '<i class="fas fa-cog"></i> YÖNETİM PANELİ';
+                adminIndicator.style.display = 'none'; // Yönetim modu göstergesini gizle
+            }
+        });
+
+        // Şifre gönderme
+        submitPasswordBtn.addEventListener('click', () => {
+            const enteredPassword = adminPasswordInput.value;
+            if (enteredPassword === ADMIN_PASSWORD) {
+                passwordModal.style.display = 'none'; // Modalı gizle
+                adminPanel.style.display = 'block'; // Admin panelini göster
+                adminToggleBtn.innerHTML = '<i class="fas fa-home"></i> ANA SAYFA';
+                adminIndicator.style.display = 'flex'; // Yönetim modu göstergesini göster
+
+                // Yönetim paneli açıldığında varsayılan olarak Ana Banner sekmesini aç
+                document.querySelector('.admin-panel .tab[data-admin-tab="mainBanner"]').click();
+
+            } else {
+                showNotification('Yanlış şifre!', 'error');
+                adminPasswordInput.value = ''; // Şifre alanını temizle
+            }
+        });
+
+        // Enter tuşu ile şifre girişi
+        adminPasswordInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                submitPasswordBtn.click();
+            }
+        });
+
+        // Sayfa yüklendiğinde verileri render et
+        window.onload = async function() {
+            await renderMainBanner();
+            await renderSocialLinks();
+            await renderSponsors();
+            await renderTrustedSites();
+            await renderScrollingText();
+
+            // Kaydırma metni animasyonunu başlat
+            const scrollingTextElement = document.getElementById('scrollingTextContent');
+            if (scrollingTextElement) {
+                 scrollingTextElement.style.animation = 'scrollText 20s linear infinite';
+            }
+
+            // Ana sponsor pop-up'ını göster
+            await showMainSponsorPopup();
+        };
+    </script>
+</body>
+</html>

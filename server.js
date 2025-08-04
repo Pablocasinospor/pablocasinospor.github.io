@@ -1,0 +1,319 @@
+const express = require('express');
+const fs = require('fs').promises;
+const path = require('path');
+const cors = require('cors');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const DB_FILE = path.join(__dirname, 'db.json');
+
+// CORS'u etkinleştirin
+app.use(cors());
+
+// JSON formatındaki istek gövdelerini ayrıştırmak için
+app.use(express.json());
+
+// Frontend dosyalarını servis etmek için 'public' yerine doğrudan ana dizini kullan
+app.use(express.static(__dirname));
+
+// db.json dosyasını yükle veya oluştur
+async function loadDb() {
+    try {
+        const data = await fs.readFile(DB_FILE, 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            console.log('db.json dosyası bulunamadı, yeni bir dosya oluşturuluyor.');
+            const defaultDb = {
+                mainBanner: { image: 'https://via.placeholder.com/1200x180/333333/ffffff?text=ANA+BANNER+ALANI', link: '#' },
+                socialLinks: [
+                    { id: "1", icon: "fab fa-twitter", text: "ILLEGALBET X", url: "#" },
+                    { id: "2", icon: "fas fa-link", text: "ILLEGALBET HEYLINK", url: "#" }
+                ],
+                sponsors: [
+                    { id: "3", image: "https://via.placeholder.com/1200x100/555555/dddddd?text=SPONSOR+1", link: "#" }
+                ],
+                trustedSites: [
+                    { id: "4", image: "https://via.placeholder.com/100x100/777777/ffffff?text=LOGO", name: "Güvenilir Site 1", description: "En iyi oranlar", link: "#" }
+                ],
+                scrollingText: "ÖNEMLİ DUYURU: Yeni üyelerimize özel %200 hoşgeldin bonusu! • Canlı destek 7/24 hizmetinizde! • Haftalık kayıp bonusları devam ediyor! • Anında para çekimleri başladı!"
+            };
+            await fs.writeFile(DB_FILE, JSON.stringify(defaultDb, null, 2));
+            return defaultDb;
+        }
+        throw error;
+    }
+}
+
+// db.json dosyasını kaydet
+async function saveDb(data) {
+    await fs.writeFile(DB_FILE, JSON.stringify(data, null, 2));
+}
+
+// ===================================
+// API Uç Noktaları (Endpoints)
+// ===================================
+
+// Genel Veri Alımı (Tüm veriyi tek bir yerden almak için)
+app.get('/api/data', async (req, res) => {
+    try {
+        const db = await loadDb();
+        res.json(db);
+    } catch (error) {
+        console.error('Veri çekilirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Veri çekilemedi.' });
+    }
+});
+
+// Ana Banner YÖNETİMİ
+app.get('/api/mainBanner', async (req, res) => {
+    try {
+        const db = await loadDb();
+        res.json(db.mainBanner);
+    } catch (error) {
+        console.error('Ana banner çekilirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Ana banner çekilemedi.' });
+    }
+});
+
+app.post('/api/mainBanner', async (req, res) => {
+    try {
+        const db = await loadDb();
+        db.mainBanner = req.body;
+        await saveDb(db);
+        res.status(200).json({ message: 'Ana banner güncellendi.', data: db.mainBanner });
+    } catch (error) {
+        console.error('Ana banner güncellenirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Ana banner güncellenemedi.' });
+    }
+});
+
+app.delete('/api/mainBanner', async (req, res) => {
+    try {
+        const db = await loadDb();
+        db.mainBanner = { image: '', link: '' }; // Sıfırla
+        await saveDb(db);
+        res.status(200).json({ message: 'Ana banner silindi.' });
+    } catch (error) {
+        console.error('Ana banner silinirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Ana banner silinemedi.' });
+    }
+});
+
+// Sosyal Linkler YÖNETİMİ
+app.get('/api/socialLinks', async (req, res) => {
+    try {
+        const db = await loadDb();
+        res.json(db.socialLinks);
+    } catch (error) {
+        console.error('Sosyal linkler çekilirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Sosyal linkler çekilemedi.' });
+    }
+});
+
+app.post('/api/socialLinks', async (req, res) => {
+    try {
+        const db = await loadDb();
+        const newLink = { id: Date.now().toString(), ...req.body };
+        db.socialLinks.push(newLink);
+        await saveDb(db);
+        res.status(201).json({ message: 'Sosyal link eklendi.', data: newLink });
+    } catch (error) {
+        console.error('Sosyal link eklenirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Sosyal link eklenemedi.' });
+    }
+});
+
+app.put('/api/socialLinks/:id', async (req, res) => {
+    try {
+        const db = await loadDb();
+        const { id } = req.params;
+        const updatedLink = req.body;
+        const index = db.socialLinks.findIndex(link => link.id === id);
+
+        if (index !== -1) {
+            db.socialLinks[index] = { ...db.socialLinks[index], ...updatedLink, id: id };
+            await saveDb(db);
+            res.status(200).json({ message: 'Sosyal link güncellendi.', data: db.socialLinks[index] });
+        } else {
+            res.status(404).json({ message: 'Sosyal link bulunamadı.' });
+        }
+    } catch (error) {
+        console.error('Sosyal link güncellenirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Sosyal link güncellenemedi.' });
+    }
+});
+
+app.delete('/api/socialLinks/:id', async (req, res) => {
+    try {
+        const db = await loadDb();
+        const { id } = req.params;
+        const initialLength = db.socialLinks.length;
+        db.socialLinks = db.socialLinks.filter(link => link.id !== id);
+
+        if (db.socialLinks.length < initialLength) {
+            await saveDb(db);
+            res.status(200).json({ message: 'Sosyal link silindi.' });
+        } else {
+            res.status(404).json({ message: 'Sosyal link bulunamadı.' });
+        }
+    } catch (error) {
+        console.error('Sosyal link silinirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Sosyal link silinemedi.' });
+    }
+});
+
+// Sponsorlar YÖNETİMİ
+app.get('/api/sponsors', async (req, res) => {
+    try {
+        const db = await loadDb();
+        res.json(db.sponsors);
+    } catch (error) {
+        console.error('Sponsorlar çekilirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Sponsorlar çekilemedi.' });
+    }
+});
+
+app.post('/api/sponsors', async (req, res) => {
+    try {
+        const db = await loadDb();
+        const newSponsor = { id: Date.now().toString(), ...req.body };
+        db.sponsors.push(newSponsor);
+        await saveDb(db);
+        res.status(201).json({ message: 'Sponsor eklendi.', data: newSponsor });
+    } catch (error) {
+        console.error('Sponsor eklenirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Sponsor eklenemedi.' });
+    }
+});
+
+app.put('/api/sponsors/:id', async (req, res) => {
+    try {
+        const db = await loadDb();
+        const { id } = req.params;
+        const updatedSponsor = req.body;
+        const index = db.sponsors.findIndex(s => s.id === id);
+
+        if (index !== -1) {
+            db.sponsors[index] = { ...db.sponsors[index], ...updatedSponsor, id: id };
+            await saveDb(db);
+            res.status(200).json({ message: 'Sponsor güncellendi.', data: db.sponsors[index] });
+        } else {
+            res.status(404).json({ message: 'Sponsor bulunamadı.' });
+        }
+    } catch (error) {
+        console.error('Sponsor güncellenirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Sponsor güncellenemedi.' });
+    }
+});
+
+app.delete('/api/sponsors/:id', async (req, res) => {
+    try {
+        const db = await loadDb();
+        const { id } = req.params;
+        const initialLength = db.sponsors.length;
+        db.sponsors = db.sponsors.filter(s => s.id !== id);
+
+        if (db.sponsors.length < initialLength) {
+            await saveDb(db);
+            res.status(200).json({ message: 'Sponsor silindi.' });
+        } else {
+            res.status(404).json({ message: 'Sponsor bulunamadı.' });
+        }
+    } catch (error) {
+        console.error('Sponsor silinirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Sponsor silinemedi.' });
+    }
+});
+
+// Güvenilir Siteler YÖNETİMİ
+app.get('/api/trustedSites', async (req, res) => {
+    try {
+        const db = await loadDb();
+        res.json(db.trustedSites);
+    } catch (error) {
+        console.error('Güvenilir siteler çekilirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Güvenilir siteler çekilemedi.' });
+    }
+});
+
+app.post('/api/trustedSites', async (req, res) => {
+    try {
+        const db = await loadDb();
+        const newSite = { id: Date.now().toString(), ...req.body };
+        db.trustedSites.push(newSite);
+        await saveDb(db);
+        res.status(201).json({ message: 'Güvenilir site eklendi.', data: newSite });
+    } catch (error) {
+        console.error('Güvenilir site eklenirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Güvenilir site eklenemedi.' });
+    }
+});
+
+app.put('/api/trustedSites/:id', async (req, res) => {
+    try {
+        const db = await loadDb();
+        const { id } = req.params;
+        const updatedSite = req.body;
+        const index = db.trustedSites.findIndex(site => site.id === id);
+
+        if (index !== -1) {
+            db.trustedSites[index] = { ...db.trustedSites[index], ...updatedSite, id: id };
+            await saveDb(db);
+            res.status(200).json({ message: 'Güvenilir site güncellendi.', data: db.trustedSites[index] });
+        } else {
+            res.status(404).json({ message: 'Güvenilir site bulunamadı.' });
+        }
+    } catch (error) {
+        console.error('Güvenilir site güncellenirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Güvenilir site güncellenemedi.' });
+    }
+});
+
+app.delete('/api/trustedSites/:id', async (req, res) => {
+    try {
+        const db = await loadDb();
+        const { id } = req.params;
+        const initialLength = db.trustedSites.length;
+        db.trustedSites = db.trustedSites.filter(site => site.id !== id);
+
+        if (db.trustedSites.length < initialLength) {
+            await saveDb(db);
+            res.status(200).json({ message: 'Güvenilir site silindi.' });
+        } else {
+            res.status(404).json({ message: 'Güvenilir site bulunamadı.' });
+        }
+    } catch (error) {
+        console.error('Güvenilir site silinirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Güvenilir site silinemedi.' });
+    }
+});
+
+// Kaydırma Metni Yönetimi
+app.get('/api/scrollingText', async (req, res) => {
+    try {
+        const db = await loadDb();
+        res.json({ text: db.scrollingText });
+    } catch (error) {
+        console.error('Kaydırma metni çekilirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Kaydırma metni çekilemedi.' });
+    }
+});
+
+app.post('/api/scrollingText', async (req, res) => {
+    try {
+        const db = await loadDb();
+        db.scrollingText = req.body.text;
+        await saveDb(db);
+        res.status(200).json({ message: 'Kaydırma metni güncellendi.', data: { text: db.scrollingText } });
+    } catch (error) {
+        console.error('Kaydırma metni güncellenirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Kaydırma metni güncellenemedi.' });
+    }
+});
+
+// Sunucuyu başlat
+app.listen(PORT, () => {
+    console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor.`);
+    console.log(`Frontend'e erişmek için: http://localhost:${PORT}/index.html`);
+});
