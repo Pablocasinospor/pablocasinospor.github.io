@@ -922,7 +922,7 @@
         // Kendi bilgisayarınızda çalışırken genellikle http://localhost:3000 olacaktır.
         // Canlı bir sunucuya yüklediğinizde, sunucunuzun alan adıyla güncellenmelidir.
         // Örneğin: https://sizindomaininiz.com
-        const API_BASE_URL = 'https://pablo-24kz.onrender.com'; // BURASI GÜNCELLENDİ
+        const API_BASE_URL = window.location.origin;
 
         // Yönetim paneli şifresi (DİKKAT: Gerçek bir uygulamada bu şifre asla frontend'de olmamalı,
         // sunucu tarafında güvenli bir şekilde saklanmalı ve doğrulanmalıdır!)
