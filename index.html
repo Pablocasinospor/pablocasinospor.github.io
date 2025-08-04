@@ -780,7 +780,7 @@
 
         <div class="tab-content active" id="mainContent">
             <h2 class="section-title">
-                <i class="fas fa-bullhorn"></i> SPONSORLU REKLAMLAR
+                <i class="fas fa-bullhorn"></i> ANA SPONSORLAR
             </h2>
             <div id="bannerContainer">
                 </div>
@@ -806,7 +806,7 @@
                 <div class="tab active" data-admin-tab="mainBanner">Ana Banner</div>
                 <div class="tab" data-admin-tab="social">Sosyal Medya</div>
                 <div class="tab" data-admin-tab="sponsor">Sponsorlu Reklam</div>
-                <div class="tab" data-admin-tab="trusted">Güvenilir Site</div>
+                <div class="tab" data-admin-tab="trusted">VİP SPONSORLAR</div>
                 <div class="tab" data-admin-tab="scrollingText">Kaydırma Metni</div>
                 <div class="tab" data-admin-tab="mainSponsorPopup">Pop-up Ayarı</div> </div>
 
@@ -1097,7 +1097,7 @@
                     bannerContainer.appendChild(div);
                 });
             } else {
-                bannerContainer.innerHTML = '<p style="color: #888; text-align: center;">Sponsorlu reklamlar bulunamadı.</p>';
+                bannerContainer.innerHTML = '<p style="color: #888; text-align: center;">ANA SPONSORLAR reklamlar bulunamadı.</p>';
             }
         }
 
@@ -1118,7 +1118,7 @@
                     trustedSitesGrid.appendChild(div);
                 });
             } else {
-                trustedSitesGrid.innerHTML = '<p style="color: #888; text-align: center;">Güvenilir siteler bulunamadı.</p>';
+                trustedSitesGrid.innerHTML = '<p style="color: #888; text-align: center;">VİP SPONSORLAR siteler bulunamadı.</p>';
             }
         }
 
@@ -1381,7 +1381,7 @@
                     button.addEventListener('click', (e) => deleteItem('trusted', e.target.dataset.id));
                 });
             } else {
-                adminTrustedContainer.innerHTML = '<p style="color: #888;">Henüz güvenilir site eklenmemiş.</p>';
+                adminTrustedContainer.innerHTML = '<p style="color: #888;">Henüz VİP SPONSORLAR eklenmemiş.</p>';
             }
             trustedIdInput.value = '';
             trustedImageInput.value = '';
