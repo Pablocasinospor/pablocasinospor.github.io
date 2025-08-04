@@ -1,20 +1,28 @@
 const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
-const cors = require('cors');
+const cors = require('cors'); // CORS paketini dahil edin
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'db.json');
 
-// CORS'u etkinleştirin
-app.use(cors());
+// !!! BURASI ÇOK ÖNEMLİ: CORS AYARLARI BURADA YAPILIR !!!
+const corsOptions = {
+  origin: [
+    'https://pablocasinospor.github.io', // Sizin GitHub Pages URL'niz
+    'http://localhost:3000',             // Yerel geliştirme için (isteğe bağlı, ama faydalı)
+    // Eğer Render'ın kendi frontend adresinden de test ediyorsanız buraya ekleyebilirsiniz (örn: Render'ın geçici URL'si)
+  ],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // İzin verilen HTTP metotları
+  credentials: true, // Eğer cookie veya yetkilendirme başlıkları kullanıyorsanız bunu true yapın
+  optionsSuccessStatus: 204 // Bazı tarayıcılar için
+};
+app.use(cors(corsOptions)); // CORS middleware'ini bu ayarlar ile kullanın.
+// !!! CORS AYARLARI BURADA BİTİYOR !!!
 
 // JSON formatındaki istek gövdelerini ayrıştırmak için
 app.use(express.json());
-
-// Frontend dosyalarını servis etmek için 'public' yerine doğrudan ana dizini kullan
-app.use(express.static(__dirname));
 
 // db.json dosyasını yükle veya oluştur
 async function loadDb() {
@@ -27,293 +35,287 @@ async function loadDb() {
             const defaultDb = {
                 mainBanner: { image: 'https://via.placeholder.com/1200x180/333333/ffffff?text=ANA+BANNER+ALANI', link: '#' },
                 socialLinks: [
-                    { id: "1", icon: "fab fa-twitter", text: "ILLEGALBET X", url: "#" },
-                    { id: "2", icon: "fas fa-link", text: "ILLEGALBET HEYLINK", url: "#" }
+                    { id: "1", icon: "fab fa-twitter", text: "ILLEGALBET X", link: "#" },
+                    { id: "2", icon: "fas fa-link", text: "ILLEGALBET HEYLINK", link: "#" }
                 ],
-                sponsors: [
-                    { id: "3", image: "https://via.placeholder.com/1200x100/555555/dddddd?text=SPONSOR+1", link: "#" }
+                banners: [ // sponsors'ı banners olarak değiştirdim, index.html ile uyumlu olması için
+                    { id: "3", image: "https://via.placeholder.com/1200x100/FFD700/000000?text=SPONSOR+1", link: "#" }
                 ],
                 trustedSites: [
-                    { id: "4", image: "https://via.placeholder.com/100x100/777777/ffffff?text=LOGO", name: "Güvenilir Site 1", description: "En iyi oranlar", link: "#" }
+                    { id: "4", image: "https://via.placeholder.com/100x100/FFBC00/000000?text=LOGO", name: "GÜVENİLİR SİTE 1", description: "En iyi bonuslar!", link: "#" }
                 ],
-                scrollingText: "ÖNEMLİ DUYURU: Yeni üyelerimize özel %200 hoşgeldin bonusu! • Canlı destek 7/24 hizmetinizde! • Haftalık kayıp bonusları devam ediyor! • Anında para çekimleri başladı!"
+                scrollingText: { text: "Önemli duyurular yakında burada olacak!" }, // Metni bir obje içine aldım
+                mainSponsorPopup: { // Yeni eklenen popup alanı
+                    image: "https://via.placeholder.com/600x250/FF4500/FFFFFF?text=ANA+SPONSOR+POPUP",
+                    mainText: "ANA SPONSORUMUZU KEŞFEDİN!",
+                    subText: "Özel teklifler sizi bekliyor.",
+                    link: "#",
+                    active: true // Pop-up'ın aktif olup olmadığını belirler
+                }
             };
-            await fs.writeFile(DB_FILE, JSON.stringify(defaultDb, null, 2));
+            await fs.writeFile(DB_FILE, JSON.stringify(defaultDb, null, 2), 'utf8');
             return defaultDb;
         }
         throw error;
     }
-}
 
-// db.json dosyasını kaydet
-async function saveDb(data) {
-    await fs.writeFile(DB_FILE, JSON.stringify(data, null, 2));
-}
-
-// ===================================
-// API Uç Noktaları (Endpoints)
-// ===================================
-
-// Genel Veri Alımı (Tüm veriyi tek bir yerden almak için)
-app.get('/api/data', async (req, res) => {
-    try {
-        const db = await loadDb();
-        res.json(db);
-    } catch (error) {
-        console.error('Veri çekilirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Veri çekilemedi.' });
+    async function saveDb(db) {
+        await fs.writeFile(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
     }
-});
 
-// Ana Banner YÖNETİMİ
-app.get('/api/mainBanner', async (req, res) => {
-    try {
-        const db = await loadDb();
-        res.json(db.mainBanner);
-    } catch (error) {
-        console.error('Ana banner çekilirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Ana banner çekilemedi.' });
-    }
-});
-
-app.post('/api/mainBanner', async (req, res) => {
-    try {
-        const db = await loadDb();
-        db.mainBanner = req.body;
-        await saveDb(db);
-        res.status(200).json({ message: 'Ana banner güncellendi.', data: db.mainBanner });
-    } catch (error) {
-        console.error('Ana banner güncellenirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Ana banner güncellenemedi.' });
-    }
-});
-
-app.delete('/api/mainBanner', async (req, res) => {
-    try {
-        const db = await loadDb();
-        db.mainBanner = { image: '', link: '' }; // Sıfırla
-        await saveDb(db);
-        res.status(200).json({ message: 'Ana banner silindi.' });
-    } catch (error) {
-        console.error('Ana banner silinirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Ana banner silinemedi.' });
-    }
-});
-
-// Sosyal Linkler YÖNETİMİ
-app.get('/api/socialLinks', async (req, res) => {
-    try {
-        const db = await loadDb();
-        res.json(db.socialLinks);
-    } catch (error) {
-        console.error('Sosyal linkler çekilirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Sosyal linkler çekilemedi.' });
-    }
-});
-
-app.post('/api/socialLinks', async (req, res) => {
-    try {
-        const db = await loadDb();
-        const newLink = { id: Date.now().toString(), ...req.body };
-        db.socialLinks.push(newLink);
-        await saveDb(db);
-        res.status(201).json({ message: 'Sosyal link eklendi.', data: newLink });
-    } catch (error) {
-        console.error('Sosyal link eklenirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Sosyal link eklenemedi.' });
-    }
-});
-
-app.put('/api/socialLinks/:id', async (req, res) => {
-    try {
-        const db = await loadDb();
-        const { id } = req.params;
-        const updatedLink = req.body;
-        const index = db.socialLinks.findIndex(link => link.id === id);
-
-        if (index !== -1) {
-            db.socialLinks[index] = { ...db.socialLinks[index], ...updatedLink, id: id };
-            await saveDb(db);
-            res.status(200).json({ message: 'Sosyal link güncellendi.', data: db.socialLinks[index] });
-        } else {
-            res.status(404).json({ message: 'Sosyal link bulunamadı.' });
+    // API rotaları (daha önce eklediklerimiz)
+    // Ana Banner Yönetimi
+    app.get('/api/mainBanner', async (req, res) => {
+        try {
+            const db = await loadDb();
+            res.json(db.mainBanner);
+        } catch (error) {
+            console.error('Ana banner çekilirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Ana banner çekilemedi.' });
         }
-    } catch (error) {
-        console.error('Sosyal link güncellenirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Sosyal link güncellenemedi.' });
-    }
-});
+    });
 
-app.delete('/api/socialLinks/:id', async (req, res) => {
-    try {
-        const db = await loadDb();
-        const { id } = req.params;
-        const initialLength = db.socialLinks.length;
-        db.socialLinks = db.socialLinks.filter(link => link.id !== id);
-
-        if (db.socialLinks.length < initialLength) {
+    app.put('/api/mainBanner', async (req, res) => {
+        try {
+            const db = await loadDb();
+            db.mainBanner = { image: req.body.image, link: req.body.link };
             await saveDb(db);
-            res.status(200).json({ message: 'Sosyal link silindi.' });
-        } else {
-            res.status(404).json({ message: 'Sosyal link bulunamadı.' });
+            res.status(200).json({ message: 'Ana banner güncellendi.', data: db.mainBanner });
+        } catch (error) {
+            console.error('Ana banner güncellenirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Ana banner güncellenemedi.' });
         }
-    } catch (error) {
-        console.error('Sosyal link silinirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Sosyal link silinemedi.' });
-    }
-});
+    });
 
-// Sponsorlar YÖNETİMİ
-app.get('/api/sponsors', async (req, res) => {
-    try {
-        const db = await loadDb();
-        res.json(db.sponsors);
-    } catch (error) {
-        console.error('Sponsorlar çekilirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Sponsorlar çekilemedi.' });
-    }
-});
+    // Sosyal Medya Linkleri Yönetimi
+    app.get('/api/socialLinks', async (req, res) => {
+        try {
+            const db = await loadDb();
+            res.json(db.socialLinks);
+        } catch (error) {
+            console.error('Sosyal linkler çekilirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Sosyal linkler çekilemedi.' });
+        }
+    });
 
-app.post('/api/sponsors', async (req, res) => {
-    try {
-        const db = await loadDb();
-        const newSponsor = { id: Date.now().toString(), ...req.body };
-        db.sponsors.push(newSponsor);
-        await saveDb(db);
-        res.status(201).json({ message: 'Sponsor eklendi.', data: newSponsor });
-    } catch (error) {
-        console.error('Sponsor eklenirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Sponsor eklenemedi.' });
-    }
-});
-
-app.put('/api/sponsors/:id', async (req, res) => {
-    try {
-        const db = await loadDb();
-        const { id } = req.params;
-        const updatedSponsor = req.body;
-        const index = db.sponsors.findIndex(s => s.id === id);
-
-        if (index !== -1) {
-            db.sponsors[index] = { ...db.sponsors[index], ...updatedSponsor, id: id };
+    app.post('/api/socialLinks', async (req, res) => {
+        try {
+            const db = await loadDb();
+            const newLink = { id: Date.now().toString(), ...req.body };
+            db.socialLinks.push(newLink);
             await saveDb(db);
-            res.status(200).json({ message: 'Sponsor güncellendi.', data: db.sponsors[index] });
-        } else {
-            res.status(404).json({ message: 'Sponsor bulunamadı.' });
+            res.status(201).json({ message: 'Sosyal link eklendi.', data: newLink });
+        } catch (error) {
+            console.error('Sosyal link eklenirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Sosyal link eklenemedi.' });
         }
-    } catch (error) {
-        console.error('Sponsor güncellenirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Sponsor güncellenemedi.' });
-    }
-});
+    });
 
-app.delete('/api/sponsors/:id', async (req, res) => {
-    try {
-        const db = await loadDb();
-        const { id } = req.params;
-        const initialLength = db.sponsors.length;
-        db.sponsors = db.sponsors.filter(s => s.id !== id);
+    app.put('/api/socialLinks/:id', async (req, res) => {
+        try {
+            const db = await loadDb();
+            const { id } = req.params;
+            const index = db.socialLinks.findIndex(link => link.id === id);
+            if (index !== -1) {
+                db.socialLinks[index] = { ...db.socialLinks[index], ...req.body };
+                await saveDb(db);
+                res.status(200).json({ message: 'Sosyal link güncellendi.', data: db.socialLinks[index] });
+            } else {
+                res.status(404).json({ message: 'Sosyal link bulunamadı.' });
+            }
+        } catch (error) {
+            console.error('Sosyal link güncellenirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Sosyal link güncellenemedi.' });
+        }
+    });
 
-        if (db.sponsors.length < initialLength) {
+    app.delete('/api/socialLinks/:id', async (req, res) => {
+        try {
+            const db = await loadDb();
+            const { id } = req.params;
+            const initialLength = db.socialLinks.length;
+            db.socialLinks = db.socialLinks.filter(link => link.id !== id);
+            if (db.socialLinks.length < initialLength) {
+                await saveDb(db);
+                res.status(200).json({ message: 'Sosyal link silindi.' });
+            } else {
+                res.status(404).json({ message: 'Sosyal link bulunamadı.' });
+            }
+        } catch (error) {
+            console.error('Sosyal link silinirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Sosyal link silinemedi.' });
+        }
+    });
+
+    // Sponsorlar (banners) Yönetimi
+    app.get('/api/banners', async (req, res) => {
+        try {
+            const db = await loadDb();
+            res.json(db.banners);
+        } catch (error) {
+            console.error('Sponsorlar çekilirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Sponsorlar çekilemedi.' });
+        }
+    });
+
+    app.post('/api/banners', async (req, res) => {
+        try {
+            const db = await loadDb();
+            const newBanner = { id: Date.now().toString(), ...req.body };
+            db.banners.push(newBanner);
             await saveDb(db);
-            res.status(200).json({ message: 'Sponsor silindi.' });
-        } else {
-            res.status(404).json({ message: 'Sponsor bulunamadı.' });
+            res.status(201).json({ message: 'Sponsor eklendi.', data: newBanner });
+        } catch (error) {
+            console.error('Sponsor eklenirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Sponsor eklenemedi.' });
         }
-    } catch (error) {
-        console.error('Sponsor silinirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Sponsor silinemedi.' });
-    }
-});
+    });
 
-// Güvenilir Siteler YÖNETİMİ
-app.get('/api/trustedSites', async (req, res) => {
-    try {
-        const db = await loadDb();
-        res.json(db.trustedSites);
-    } catch (error) {
-        console.error('Güvenilir siteler çekilirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Güvenilir siteler çekilemedi.' });
-    }
-});
+    app.put('/api/banners/:id', async (req, res) => {
+        try {
+            const db = await loadDb();
+            const { id } = req.params;
+            const index = db.banners.findIndex(banner => banner.id === id);
+            if (index !== -1) {
+                db.banners[index] = { ...db.banners[index], ...req.body };
+                await saveDb(db);
+                res.status(200).json({ message: 'Sponsor güncellendi.', data: db.banners[index] });
+            } else {
+                res.status(404).json({ message: 'Sponsor bulunamadı.' });
+            }
+        } catch (error) {
+            console.error('Sponsor güncellenirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Sponsor güncellenemedi.' });
+        }
+    });
 
-app.post('/api/trustedSites', async (req, res) => {
-    try {
-        const db = await loadDb();
-        const newSite = { id: Date.now().toString(), ...req.body };
-        db.trustedSites.push(newSite);
-        await saveDb(db);
-        res.status(201).json({ message: 'Güvenilir site eklendi.', data: newSite });
-    } catch (error) {
-        console.error('Güvenilir site eklenirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Güvenilir site eklenemedi.' });
-    }
-});
+    app.delete('/api/banners/:id', async (req, res) => {
+        try {
+            const db = await loadDb();
+            const { id } = req.params;
+            const initialLength = db.banners.length;
+            db.banners = db.banners.filter(banner => banner.id !== id);
+            if (db.banners.length < initialLength) {
+                await saveDb(db);
+                res.status(200).json({ message: 'Sponsor silindi.' });
+            } else {
+                res.status(404).json({ message: 'Sponsor bulunamadı.' });
+            }
+        } catch (error) {
+            console.error('Sponsor silinirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Sponsor silinemedi.' });
+        }
+    });
 
-app.put('/api/trustedSites/:id', async (req, res) => {
-    try {
-        const db = await loadDb();
-        const { id } = req.params;
-        const updatedSite = req.body;
-        const index = db.trustedSites.findIndex(site => site.id === id);
+    // Güvenilir Siteler Yönetimi
+    app.get('/api/trustedSites', async (req, res) => {
+        try {
+            const db = await loadDb();
+            res.json(db.trustedSites);
+        } catch (error) {
+            console.error('Güvenilir siteler çekilirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Güvenilir siteler çekilemedi.' });
+        }
+    });
 
-        if (index !== -1) {
-            db.trustedSites[index] = { ...db.trustedSites[index], ...updatedSite, id: id };
+    app.post('/api/trustedSites', async (req, res) => {
+        try {
+            const db = await loadDb();
+            const newSite = { id: Date.now().toString(), ...req.body };
+            db.trustedSites.push(newSite);
             await saveDb(db);
-            res.status(200).json({ message: 'Güvenilir site güncellendi.', data: db.trustedSites[index] });
-        } else {
-            res.status(404).json({ message: 'Güvenilir site bulunamadı.' });
+            res.status(201).json({ message: 'Güvenilir site eklendi.', data: newSite });
+        } catch (error) {
+            console.error('Güvenilir site eklenirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Güvenilir site eklenemedi.' });
         }
-    } catch (error) {
-        console.error('Güvenilir site güncellenirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Güvenilir site güncellenemedi.' });
-    }
-});
+    });
 
-app.delete('/api/trustedSites/:id', async (req, res) => {
-    try {
-        const db = await loadDb();
-        const { id } = req.params;
-        const initialLength = db.trustedSites.length;
-        db.trustedSites = db.trustedSites.filter(site => site.id !== id);
+    app.put('/api/trustedSites/:id', async (req, res) => {
+        try {
+            const db = await loadDb();
+            const { id } = req.params;
+            const index = db.trustedSites.findIndex(site => site.id === id);
+            if (index !== -1) {
+                db.trustedSites[index] = { ...db.trustedSites[index], ...req.body };
+                await saveDb(db);
+                res.status(200).json({ message: 'Güvenilir site güncellendi.', data: db.trustedSites[index] });
+            } else {
+                res.status(404).json({ message: 'Güvenilir site bulunamadı.' });
+            }
+        } catch (error) {
+            console.error('Güvenilir site güncellenirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Güvenilir site güncellenemedi.' });
+        }
+    });
 
-        if (db.trustedSites.length < initialLength) {
+    app.delete('/api/trustedSites/:id', async (req, res) => {
+        try {
+            const db = await loadDb();
+            const { id } = req.params;
+            const initialLength = db.trustedSites.length;
+            db.trustedSites = db.trustedSites.filter(site => site.id !== id);
+
+            if (db.trustedSites.length < initialLength) {
+                await saveDb(db);
+                res.status(200).json({ message: 'Güvenilir site silindi.' });
+            } else {
+                res.status(404).json({ message: 'Güvenilir site bulunamadı.' });
+            }
+        } catch (error) {
+            console.error('Güvenilir site silinirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Güvenilir site silinemedi.' });
+        }
+    });
+
+    // Kaydırma Metni Yönetimi
+    app.get('/api/scrollingText', async (req, res) => {
+        try {
+            const db = await loadDb();
+            res.json(db.scrollingText); // Direk objeyi dönüyoruz
+        } catch (error) {
+            console.error('Kaydırma metni çekilirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Kaydırma metni çekilemedi.' });
+        }
+    });
+
+    app.put('/api/scrollingText/1', async (req, res) => { // PUT metodu ve sabit ID 1
+        try {
+            const db = await loadDb();
+            db.scrollingText = { text: req.body.text }; // objeyi güncelliyoruz
             await saveDb(db);
-            res.status(200).json({ message: 'Güvenilir site silindi.' });
-        } else {
-            res.status(404).json({ message: 'Güvenilir site bulunamadı.' });
+            res.status(200).json({ message: 'Kaydırma metni güncellendi.', data: db.scrollingText });
+        } catch (error) {
+            console.error('Kaydırma metni güncellenirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Kaydırma metni güncellenemedi.' });
         }
-    } catch (error) {
-        console.error('Güvenilir site silinirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Güvenilir site silinemedi.' });
-    }
-});
+    });
 
-// Kaydırma Metni Yönetimi
-app.get('/api/scrollingText', async (req, res) => {
-    try {
-        const db = await loadDb();
-        res.json({ text: db.scrollingText });
-    } catch (error) {
-        console.error('Kaydırma metni çekilirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Kaydırma metni çekilemedi.' });
-    }
-});
+    // Ana Sponsor Pop-up Yönetimi
+    app.get('/api/mainSponsorPopup', async (req, res) => {
+        try {
+            const db = await loadDb();
+            res.json(db.mainSponsorPopup);
+        } catch (error) {
+            console.error('Main sponsor popup çekilirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Main sponsor popup çekilemedi.' });
+        }
+    });
 
-app.post('/api/scrollingText', async (req, res) => {
-    try {
-        const db = await loadDb();
-        db.scrollingText = req.body.text;
-        await saveDb(db);
-        res.status(200).json({ message: 'Kaydırma metni güncellendi.', data: { text: db.scrollingText } });
-    } catch (error) {
-        console.error('Kaydırma metni güncellenirken hata:', error);
-        res.status(500).json({ message: 'Sunucu hatası: Kaydırma metni güncellenemedi.' });
-    }
-});
+    app.put('/api/mainSponsorPopup/1', async (req, res) => { // PUT metodu ve sabit ID 1
+        try {
+            const db = await loadDb();
+            db.mainSponsorPopup = { ...db.mainSponsorPopup, ...req.body };
+            await saveDb(db);
+            res.status(200).json({ message: 'Main sponsor popup güncellendi.', data: db.mainSponsorPopup });
+        } catch (error) {
+            console.error('Main sponsor popup güncellenirken hata:', error);
+            res.status(500).json({ message: 'Sunucu hatası: Main sponsor popup güncellenemedi.' });
+        }
+    });
 
-// Sunucuyu başlat
-app.listen(PORT, () => {
-    console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor.`);
-    console.log(`Frontend'e erişmek için: http://localhost:${PORT}/index.html`);
-});
+    // Sunucuyu başlat
+    app.listen(PORT, () => {
+        console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor.`);
+        console.log(`API istekleri için http://localhost:${PORT}/api/* adresini kullanın.`);
+    });
