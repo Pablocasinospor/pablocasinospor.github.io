@@ -1,7 +1,7 @@
 {
-  "name": "illegal-bet-backend",
+  "name": "pablo-casino-backend",
   "version": "1.0.0",
-  "description": "Backend for Illegal Bet Casino website",
+  "description": "Backend for Pablo Casino website",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
