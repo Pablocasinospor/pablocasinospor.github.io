@@ -398,6 +398,16 @@
             color: white;
         }
 
+        .btn-up {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-down {
+            background: #9C27B0;
+            color: white;
+        }
+
         /* Scrolling Text */
         .scrolling-text {
             background: var(--darker);
@@ -767,7 +777,7 @@
                 <h1>PABLO CASINO</h1>
             </div>
             <div>
-                <button class="btn" id="adminToggle"><i class="fas fa-cog"></i> YÖNETİM PANELİ</button>
+                <button class="btn" id="adminToggle" title="Yönetim Paneli"><i class="fas fa-cog"></i></button>
             </div>
         </div>
 
@@ -945,7 +955,7 @@
 
     <script>
         // API_BASE_URL: Backend'in çalıştığı URL.
-        const API_BASE_URL = 'https://pablocasinospor-github-io.onrender.com'; // Sizin Render.com backend adresiniz!
+        const API_BASE_URL = 'http://13.62.98.12:3000'; // Kendi sunucu IP adresiniz
 
         // Yönetim paneli şifresi (DİKKAT: Gerçek bir uygulamada bu şifre asla frontend'de olmamalıdır!)
         const ADMIN_PASSWORD = "bebek"; // Lütfen bunu daha güvenli bir şifreyle değiştirin!
@@ -1032,7 +1042,6 @@
 
                 const response = await fetch(`${API_BASE_URL}/api/${endpoint}`, options);
                 if (!response.ok) {
-                    // console.error(`HTTP hata! Durum: ${response.status}`);
                     const errorData = await response.json();
                     throw new Error(errorData.message || 'API isteği başarısız oldu.');
                 }
@@ -1057,7 +1066,7 @@
         // Frontend Verilerini Yükleme ve Gösterme
         async function renderMainBanner() {
             mainBannerDisplay.innerHTML = 'Ana banner yükleniyor...';
-            const data = await fetchData('main-banner'); // Endpoint düzeltildi
+            const data = await fetchData('main-banner');
             if (data && data.image) {
                 mainBannerDisplay.innerHTML = `<a href="${data.link}" target="_blank"><img src="${data.image}" alt="Ana Banner"></a>`;
             } else {
@@ -1067,7 +1076,7 @@
 
         async function renderSocialLinks() {
             socialLinksContainer.innerHTML = '';
-            const links = await fetchData('social-links'); // Endpoint düzeltildi
+            const links = await fetchData('social-links');
             if (links && links.length > 0) {
                 links.forEach(link => {
                     const a = document.createElement('a');
@@ -1085,6 +1094,9 @@
         async function renderSponsors() {
             bannerContainer.innerHTML = '';
             const sponsors = await fetchData('sponsors');
+            // Sıralama: order alanına göre sırala
+            sponsors.sort((a, b) => a.order - b.order);
+            
             if (sponsors && sponsors.length > 0) {
                 sponsors.forEach(sponsor => {
                     const div = document.createElement('div');
@@ -1103,7 +1115,7 @@
 
         async function renderTrustedSites() {
             trustedSitesGrid.innerHTML = '';
-            const sites = await fetchData('trusted-sites'); // Endpoint düzeltildi
+            const sites = await fetchData('trusted-sites');
             if (sites && sites.length > 0) {
                 sites.forEach(site => {
                     const div = document.createElement('div');
@@ -1124,7 +1136,7 @@
 
         async function renderScrollingText() {
             scrollingTextContent.textContent = 'Duyurular yükleniyor...';
-            const data = await fetchData('scrolling-text'); // Endpoint düzeltildi
+            const data = await fetchData('scrolling-text');
             if (data && data.text) {
                 scrollingTextContent.textContent = data.text;
             } else {
@@ -1134,7 +1146,7 @@
 
         async function renderMainSponsorPopup() {
             popupBannerImageContainer.innerHTML = '<p>Ana sponsor pop-up yükleniyor...</p>';
-            const data = await fetchData('main-sponsor-popup'); // Endpoint düzeltildi
+            const data = await fetchData('main-sponsor-popup');
             if (data && data.active) {
                 popupBannerImageContainer.innerHTML = `<img src="${data.image}" alt="Ana Sponsor Pop-up">`;
                 popupMainText.textContent = data.mainText;
@@ -1230,7 +1242,7 @@
 
         // Admin: Ana Banner Yükleme
         async function loadMainBannerForAdmin() {
-            const data = await fetchData('main-banner'); // Endpoint düzeltildi
+            const data = await fetchData('main-banner');
             if (data) {
                 mainBannerImageInput.value = data.image || '';
                 mainBannerLinkInput.value = data.link || '';
@@ -1243,7 +1255,7 @@
                 image: mainBannerImageInput.value,
                 link: mainBannerLinkInput.value
             };
-            const result = await fetchData('main-banner', 'POST', data); // Endpoint düzeltildi
+            const result = await fetchData('main-banner', 'POST', data);
             if (result) {
                 showNotification(result.message);
                 await renderMainBanner(); // Frontend'i güncelle
@@ -1254,7 +1266,7 @@
         // Admin: Sosyal Linkler Yükleme
         async function loadSocialLinksForAdmin() {
             adminSocialLinksContainer.innerHTML = '';
-            const links = await fetchData('social-links'); // Endpoint düzeltildi
+            const links = await fetchData('social-links');
             if (links && links.length > 0) {
                 links.forEach(link => {
                     const div = document.createElement('div');
@@ -1293,9 +1305,9 @@
             };
             let result;
             if (socialIdInput.value) {
-                result = await fetchData(`social-links/${socialIdInput.value}`, 'PUT', data); // Endpoint düzeltildi
+                result = await fetchData(`social-links/${socialIdInput.value}`, 'PUT', data);
             } else {
-                result = await fetchData('social-links', 'POST', data); // Endpoint düzeltildi
+                result = await fetchData('social-links', 'POST', data);
             }
             if (result) {
                 showNotification(result.message);
@@ -1308,20 +1320,45 @@
         async function loadSponsorsForAdmin() {
             adminSponsorContainer.innerHTML = '';
             const sponsors = await fetchData('sponsors');
+            // Sıralama: order alanına göre sırala
+            sponsors.sort((a, b) => a.order - b.order);
+            
             if (sponsors && sponsors.length > 0) {
-                sponsors.forEach(sponsor => {
+                sponsors.forEach((sponsor, index) => {
                     const div = document.createElement('div');
                     div.className = "admin-item";
                     div.innerHTML = `
                         <img src="${sponsor.image}" alt="Sponsor Görseli">
                         <p>${sponsor.link}</p>
                         <div class="admin-actions">
+                            <button class="btn btn-up" data-id="${sponsor.id}" ${index === 0 ? 'disabled' : ''}><i class="fas fa-arrow-up"></i></button>
+                            <button class="btn btn-down" data-id="${sponsor.id}" ${index === sponsors.length-1 ? 'disabled' : ''}><i class="fas fa-arrow-down"></i></button>
                             <button class="btn btn-edit" data-id="${sponsor.id}" data-type="sponsor"><i class="fas fa-edit"></i> Düzenle</button>
                             <button class="btn btn-delete" data-id="${sponsor.id}" data-type="sponsor"><i class="fas fa-trash"></i> Sil</button>
                         </div>
                     `;
                     adminSponsorContainer.appendChild(div);
                 });
+                
+                // Yukarı butonları için event
+                document.querySelectorAll('#adminSponsorContainer .btn-up').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const id = e.target.dataset.id;
+                        await moveSponsor(id, 'up');
+                        await loadSponsorsForAdmin(); // Listeyi yeniden yükle
+                    });
+                });
+                
+                // Aşağı butonları için event
+                document.querySelectorAll('#adminSponsorContainer .btn-down').forEach(button => {
+                    button.addEventListener('click', async (e) => {
+                        const id = e.target.dataset.id;
+                        await moveSponsor(id, 'down');
+                        await loadSponsorsForAdmin(); // Listeyi yeniden yükle
+                    });
+                });
+                
+                // Düzenle ve sil event'leri
                 document.querySelectorAll('#adminSponsorContainer .btn-edit').forEach(button => {
                     button.addEventListener('click', (e) => editItem('sponsor', e.target.dataset.id));
                 });
@@ -1336,6 +1373,39 @@
             sponsorLinkInput.value = '';
         }
 
+        // Sponsor sırasını değiştirme
+        async function moveSponsor(id, direction) {
+            const sponsors = await fetchData('sponsors');
+            // Sıralı değilse sırala
+            sponsors.sort((a, b) => a.order - b.order);
+            const index = sponsors.findIndex(s => s.id === id);
+            if (index === -1) return;
+
+            let targetIndex;
+            if (direction === 'up' && index > 0) {
+                targetIndex = index - 1;
+            } else if (direction === 'down' && index < sponsors.length - 1) {
+                targetIndex = index + 1;
+            } else {
+                return; // Geçersiz hareket
+            }
+
+            // Order değerlerini değiştir
+            const tempOrder = sponsors[index].order;
+            sponsors[index].order = sponsors[targetIndex].order;
+            sponsors[targetIndex].order = tempOrder;
+
+            // Her iki sponsoru da güncelle
+            try {
+                await fetchData(`sponsors/${sponsors[index].id}`, 'PUT', sponsors[index]);
+                await fetchData(`sponsors/${sponsors[targetIndex].id}`, 'PUT', sponsors[targetIndex]);
+                showNotification('Sıra güncellendi.');
+            } catch (error) {
+                console.error('Sıra değiştirilirken hata:', error);
+                showNotification('Hata: Sıra değiştirilemedi.', 'error');
+            }
+        }
+
         saveSponsorBtn.addEventListener('click', async () => {
             const data = {
                 image: sponsorImageInput.value,
@@ -1345,6 +1415,10 @@
             if (sponsorIdInput.value) {
                 result = await fetchData(`sponsors/${sponsorIdInput.value}`, 'PUT', data);
             } else {
+                // Yeni sponsor eklerken order ataması
+                const sponsors = await fetchData('sponsors');
+                const maxOrder = sponsors.length > 0 ? Math.max(...sponsors.map(s => s.order)) : 0;
+                data.order = maxOrder + 1;
                 result = await fetchData('sponsors', 'POST', data);
             }
             if (result) {
@@ -1357,7 +1431,7 @@
         // Admin: Güvenilir Siteler Yükleme
         async function loadTrustedSitesForAdmin() {
             adminTrustedContainer.innerHTML = '';
-            const sites = await fetchData('trusted-sites'); // Endpoint düzeltildi
+            const sites = await fetchData('trusted-sites');
             if (sites && sites.length > 0) {
                 sites.forEach(site => {
                     const div = document.createElement('div');
@@ -1399,9 +1473,9 @@
             };
             let result;
             if (trustedIdInput.value) {
-                result = await fetchData(`trusted-sites/${trustedIdInput.value}`, 'PUT', data); // Endpoint düzeltildi
+                result = await fetchData(`trusted-sites/${trustedIdInput.value}`, 'PUT', data);
             } else {
-                result = await fetchData('trusted-sites', 'POST', data); // Endpoint düzeltildi
+                result = await fetchData('trusted-sites', 'POST', data);
             }
             if (result) {
                 showNotification(result.message);
@@ -1412,7 +1486,7 @@
 
         // Admin: Kaydırma Metni Yükleme
         async function loadScrollingTextForAdmin() {
-            const data = await fetchData('scrolling-text'); // Endpoint düzeltildi
+            const data = await fetchData('scrolling-text');
             if (data) {
                 scrollingTextAdminPanelInput.value = data.text || '';
             }
@@ -1422,7 +1496,7 @@
             const data = {
                 text: scrollingTextAdminPanelInput.value
             };
-            const result = await fetchData('scrolling-text', 'POST', data); // Endpoint düzeltildi
+            const result = await fetchData('scrolling-text', 'POST', data);
             if (result) {
                 showNotification(result.message);
                 await renderScrollingText();
@@ -1432,7 +1506,7 @@
 
         // Admin: Pop-up Ayarı Yükleme
         async function loadMainSponsorPopupForAdmin() {
-            const data = await fetchData('main-sponsor-popup'); // Endpoint düzeltildi
+            const data = await fetchData('main-sponsor-popup');
             if (data) {
                 popupImageInput.value = data.image || '';
                 popupMainTextAdminInput.value = data.mainText || '';
@@ -1452,7 +1526,7 @@
                 link: popupLinkInput.value,
                 active: popupActiveCheckbox.checked
             };
-            const result = await fetchData('main-sponsor-popup', 'POST', data); // Endpoint düzeltildi
+            const result = await fetchData('main-sponsor-popup', 'POST', data);
             if (result) {
                 showNotification(result.message);
                 await renderMainSponsorPopup(); // Frontend'i güncelle
@@ -1464,7 +1538,7 @@
         async function editItem(type, id) {
             let item;
             if (type === 'social') {
-                const links = await fetchData('social-links'); // Endpoint düzeltildi
+                const links = await fetchData('social-links');
                 item = links.find(link => link.id === id);
                 if (item) {
                     socialIdInput.value = item.id;
@@ -1481,7 +1555,7 @@
                     sponsorLinkInput.value = item.link;
                 }
             } else if (type === 'trusted') {
-                const sites = await fetchData('trusted-sites'); // Endpoint düzeltildi
+                const sites = await fetchData('trusted-sites');
                 item = sites.find(site => site.id === id);
                 if (item) {
                     trustedIdInput.value = item.id;
@@ -1497,11 +1571,11 @@
             if (confirm('Bu öğeyi silmek istediğinizden emin misiniz?')) {
                 let result;
                 if (type === 'social') {
-                    result = await fetchData(`social-links/${id}`, 'DELETE'); // Endpoint düzeltildi
+                    result = await fetchData(`social-links/${id}`, 'DELETE');
                 } else if (type === 'sponsor') {
                     result = await fetchData(`sponsors/${id}`, 'DELETE');
                 } else if (type === 'trusted') {
-                    result = await fetchData(`trusted-sites/${id}`, 'DELETE'); // Endpoint düzeltildi
+                    result = await fetchData(`trusted-sites/${id}`, 'DELETE');
                 }
 
                 if (result) {
@@ -1533,7 +1607,7 @@
                 }
             } catch (error) {
                 console.error("API Test Hatası:", error);
-                console.warn("API'ye ulaşılamadı. Render sunucusu uyku modunda olabilir veya bir ağ sorunu mevcut.");
+                console.warn("API'ye ulaşılamadı. Sunucu kapalı olabilir veya ağ sorunu mevcut.");
             }
         }
 
