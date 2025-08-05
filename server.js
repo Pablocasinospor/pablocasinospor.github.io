@@ -25,10 +25,14 @@ async function ensureTmpDirectory() {
 
 // CORS Ayarları
 const corsOptions = {
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-    optionsSuccessStatus: 204
+  origin: [
+    'http://13.62.98.12',
+    'https://pablocasinospor.github.io',
+    'http://localhost' // Geliştirme için
+  ],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204
 };
 app.use(cors(corsOptions));
 
