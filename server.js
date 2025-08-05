@@ -1,48 +1,35 @@
 const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
-const cors = require('cors');
+const cors = require('cors'); // CORS modülünü dahil et
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const https = require('https');
-const fs = require('fs');
-
-const options = {
-  key: fs.readFileSync('/etc/letsencrypt/live/13.62.98.12/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/13.62.98.12/fullchain.pem')
-};
-
-https.createServer(options, app).listen(3000);
-
-// DB Dosyası İçin Klasör
+// 3. DB Dosyası İzin Sorunu Çözümü: 'tmp' klasörü kullan
 const DB_DIR = path.join(__dirname, 'tmp');
 const DB_FILE = path.join(DB_DIR, 'db.json');
 
 // Uygulama başlangıcında 'tmp' klasörünü oluştur
+// fs.promises kullandığımız için burayı async/await ile halledelim
 async function ensureTmpDirectory() {
     try {
         await fs.mkdir(DB_DIR, { recursive: true });
         console.log('tmp dizini oluşturuldu veya zaten mevcut.');
     } catch (error) {
-        if (error.code !== 'EEXIST') {
+        if (error.code !== 'EEXIST') { // EEXIST, dizinin zaten var olduğu anlamına gelir, hata değil.
             console.error('tmp dizini oluşturulurken hata:', error);
-            process.exit(1);
+            process.exit(1); // Hata durumunda uygulamayı sonlandır
         }
     }
 }
 
-// CORS Ayarları
+// 1. CORS Sorunu Çözümü: Güncellenmiş CORS ayarı
 const corsOptions = {
-  origin: [
-    'http://13.62.98.12',
-    'https://pablocasinospor.github.io',
-    'http://localhost' // Geliştirme için
-  ],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-  optionsSuccessStatus: 204
+    origin: '*', // Tüm domainlere izin ver. Belirli bir domain isterseniz buraya 'https://yourgithubusername.github.io' yazın.
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    optionsSuccessStatus: 204
 };
 app.use(cors(corsOptions));
 
@@ -54,7 +41,7 @@ app.use(express.static(__dirname));
 
 // db.json dosyasını yükle veya oluştur
 async function loadDb() {
-    await ensureTmpDirectory();
+    await ensureTmpDirectory(); // Her yüklemede tmp klasörünün varlığını kontrol et
     try {
         const data = await fs.readFile(DB_FILE, 'utf8');
         return JSON.parse(data);
@@ -68,7 +55,7 @@ async function loadDb() {
                     { id: "2", icon: "fas fa-link", text: "ILLEGALBET HEYLINK", url: "#" }
                 ],
                 sponsors: [
-                    { id: "3", image: "https://via.placeholder.com/1200x100/555555/dddddd?text=SPONSOR+1", link: "#", order: 1 }
+                    { id: "3", image: "https://via.placeholder.com/1200x100/555555/dddddd?text=SPONSOR+1", link: "#" }
                 ],
                 trustedSites: [
                     { id: "4", image: "https://via.placeholder.com/100x100/777777/ffffff?text=LOGO", name: "Güvenilir Site 1", description: "En iyi oranlar", link: "#" }
@@ -98,12 +85,12 @@ async function saveDb(data) {
 // API Uç Noktaları (Endpoints)
 // ===================================
 
-// Test Endpointi
+// 4. Temel Test Endpointi Ekleme
 app.get('/api/test', (req, res) => {
     res.json({ status: 'active', message: 'API çalışıyor!' });
 });
 
-// Genel Veri Alımı
+// Genel Veri Alımı (Tüm veriyi tek bir yerden almak için)
 app.get('/api/data', async (req, res) => {
     try {
         const db = await loadDb();
@@ -114,6 +101,7 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
+// 2. API Endpoint Uyumsuzluğu Çözümü: Endpoint isimlerini düzeltin (kebab-case)
 // Ana Banner YÖNETİMİ
 app.get('/api/main-banner', async (req, res) => {
     try {
@@ -134,6 +122,18 @@ app.post('/api/main-banner', async (req, res) => {
     } catch (error) {
         console.error('Ana banner güncellenirken hata:', error);
         res.status(500).json({ message: 'Sunucu hatası: Ana banner güncellenemedi.' });
+    }
+});
+
+app.delete('/api/main-banner', async (req, res) => {
+    try {
+        const db = await loadDb();
+        db.mainBanner = { image: '', link: '' }; // Sıfırla
+        await saveDb(db);
+        res.status(200).json({ message: 'Ana banner silindi.' });
+    } catch (error) {
+        console.error('Ana banner silinirken hata:', error);
+        res.status(500).json({ message: 'Sunucu hatası: Ana banner silinemedi.' });
     }
 });
 
@@ -204,9 +204,7 @@ app.delete('/api/social-links/:id', async (req, res) => {
 app.get('/api/sponsors', async (req, res) => {
     try {
         const db = await loadDb();
-        // Order alanına göre sırala
-        const sponsors = db.sponsors.sort((a, b) => a.order - b.order);
-        res.json(sponsors);
+        res.json(db.sponsors);
     } catch (error) {
         console.error('Sponsorlar çekilirken hata:', error);
         res.status(500).json({ message: 'Sunucu hatası: Sponsorlar çekilemedi.' });
@@ -216,13 +214,7 @@ app.get('/api/sponsors', async (req, res) => {
 app.post('/api/sponsors', async (req, res) => {
     try {
         const db = await loadDb();
-        // Mevcut maksimum order'ı bul
-        const maxOrder = db.sponsors.length > 0 ? Math.max(...db.sponsors.map(s => s.order)) : 0;
-        const newSponsor = { 
-            id: Date.now().toString(), 
-            ...req.body,
-            order: maxOrder + 1 
-        };
+        const newSponsor = { id: Date.now().toString(), ...req.body };
         db.sponsors.push(newSponsor);
         await saveDb(db);
         res.status(201).json({ message: 'Sponsor eklendi.', data: newSponsor });
