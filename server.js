@@ -6,6 +6,16 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const https = require('https');
+const fs = require('fs');
+
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/13.62.98.12/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/13.62.98.12/fullchain.pem')
+};
+
+https.createServer(options, app).listen(3000);
+
 // DB Dosyası İçin Klasör
 const DB_DIR = path.join(__dirname, 'tmp');
 const DB_FILE = path.join(DB_DIR, 'db.json');
